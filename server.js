@@ -26,6 +26,7 @@ function loadEnv() {
 
 const env = { ...loadEnv(), ...process.env };
 const port = Number(process.env.PORT || env.PORT || 3000);
+const REQUEST_TIMEOUT_MS = Number(process.env.REQUEST_TIMEOUT_MS || env.REQUEST_TIMEOUT_MS || 15000);
 
 function getBackendUrls() {
   const raw = process.env.BACKEND_URLS || process.env.BACKEND_URL || env.BACKEND_URLS || env.BACKEND_URL || '';
@@ -51,6 +52,10 @@ function requestUrl(url) {
         status: res.statusCode,
         url
       });
+    });
+
+    req.setTimeout(REQUEST_TIMEOUT_MS, () => {
+      req.destroy(new Error(`Request timeout after ${REQUEST_TIMEOUT_MS}ms`));
     });
 
     req.on('error', reject);
